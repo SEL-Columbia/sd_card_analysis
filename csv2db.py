@@ -67,6 +67,7 @@ def load_dir(data_dir, db):
             log = csv.reader(open(os.path.join(root, f), 'rb'), delimiter=',')
             header = log.next()
 
+            line_number = 0
             for row in log:
                 timestamp = datetime.strptime(row[0], "%Y%m%d%H%M%S").isoformat(' ')
                 watts = float(row[1])
@@ -79,9 +80,14 @@ def load_dir(data_dir, db):
                 volt_amps = float(row[15])
                 status = 1 if int(row[16]) == 0 else 1
                 machine_id = row[18]
-                credit = 0.0 if circuit_type == "MAINS" else float(row[20])
+                try:
+                    credit = 0.0 if circuit_type == "MAINS" else float(row[20])
+                except ValueError:
+                    print "value error on line ", line_number, "of csv file"
+                    break
 
                 db_cursor.execute("INSERT INTO logs (circuitid, timestamp, watts, volts, amps, watthours_sc20, watthours_today, powerfactor, frequency, voltamps, status, machineid, credit) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)", (idx, timestamp, watts, volts, amps, wh_sc20, wh_today, power_factor, frequency, volt_amps, status, machine_id, credit))
+                line_number += 1
 
     db_connection.commit()
     db_cursor.close()
