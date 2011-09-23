@@ -56,6 +56,7 @@ def load_dir(data_dir, db):
             print os.path.join(root, f)
 
             circuit_id = int(f[-6:-4])
+            # is MAINS always on circuit 0?
             circuit_type = "MAINS" if circuit_id == 0 else "CONSUMER"
             if circuit_id not in circuit_ids:
                 db_cursor.execute("INSERT INTO circuits (circuit, type) VALUES(?,?)",
