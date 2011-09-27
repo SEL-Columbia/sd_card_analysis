@@ -1,6 +1,9 @@
 '''
 traverses a tree of sdcard csv files and
 creates a sqlite database
+
+> python csv2db.py <data_directory> <database_name>
+
 '''
 
 
@@ -9,30 +12,30 @@ from datetime import datetime
 
 class SQLQueries:
     create_circuits_table = '''
-CREATE TABLE circuits (
-circuitid INTEGER PRIMARY KEY AUTOINCREMENT,
-circuit NUMERIC UNIQUE,
-type TEXT)
-'''
+                            CREATE TABLE circuits (
+                            circuitid INTEGER PRIMARY KEY AUTOINCREMENT,
+                            circuit NUMERIC UNIQUE,
+                            type TEXT)
+                            '''
 
     create_logs_table = '''
-CREATE TABLE logs (
-logid INTEGER PRIMARY KEY AUTOINCREMENT,
-circuitid INTEGER,
-timestamp TIMESTAMP,
-watts FLOAT,
-volts FLOAT,
-amps FLOAT,
-watthours_sc20 FLOAT,
-watthours_today FLOAT,
-powerfactor INTEGER,
-frequency FLOAT,
-voltamps FLOAT,
-status BOOLEAN,
-machineid TEXT,
-credit FLOAT,
-FOREIGN KEY(circuitid) references circuits(circuitid))
-'''
+                        CREATE TABLE logs (
+                        logid INTEGER PRIMARY KEY AUTOINCREMENT,
+                        circuitid INTEGER,
+                        timestamp TIMESTAMP,
+                        watts FLOAT,
+                        volts FLOAT,
+                        amps FLOAT,
+                        watthours_sc20 FLOAT,
+                        watthours_today FLOAT,
+                        powerfactor INTEGER,
+                        frequency FLOAT,
+                        voltamps FLOAT,
+                        status BOOLEAN,
+                        machineid TEXT,
+                        credit FLOAT,
+                        FOREIGN KEY(circuitid) references circuits(circuitid))
+                        '''
 
 def load_file(csv_file, db):
     pass
@@ -65,6 +68,8 @@ def load_dir(data_dir, db):
                 circuit_ids[circuit_id] = circuit_index
 
             idx = circuit_ids[circuit_id]
+            # does it make sense to instead store the circuit_id in the table
+            # idx = circuit_id
             log = csv.reader(open(os.path.join(root, f), 'rb'), delimiter=',')
             header = log.next()
 
@@ -87,7 +92,13 @@ def load_dir(data_dir, db):
                     print "value error on line ", line_number, "of csv file"
                     break
 
-                db_cursor.execute("INSERT INTO logs (circuitid, timestamp, watts, volts, amps, watthours_sc20, watthours_today, powerfactor, frequency, voltamps, status, machineid, credit) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)", (idx, timestamp, watts, volts, amps, wh_sc20, wh_today, power_factor, frequency, volt_amps, status, machine_id, credit))
+                db_cursor.execute('''INSERT INTO logs (circuitid, timestamp, watts, volts, amps,
+                                   watthours_sc20, watthours_today, powerfactor, frequency,
+                                   voltamps, status, machineid, credit)
+                                   VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)''',
+                                   (idx, timestamp, watts, volts, amps, wh_sc20,
+                                   wh_today, power_factor, frequency, volt_amps,
+                                   status, machine_id, credit))
                 line_number += 1
 
     db_connection.commit()
