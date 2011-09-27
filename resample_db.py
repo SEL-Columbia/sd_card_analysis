@@ -71,13 +71,9 @@ def get_wh_for_timestamp_and_circuit(circuit, timestamp):
     cur.execute(sql)
     row = cur.fetchone()
     if row!=None:
-        wh = row[0]
-        cr = row[1]
+        return row[0], row[1]
     else:
-        wh = None
-        cr = None
-
-    return wh, cr
+        return None
 
 datestamps = [datetime(2011,9,1),
               datetime(2011,9,2),
@@ -96,13 +92,11 @@ while current_time < timeEnd:
         print current_time,
         print cid,
         ts = get_most_recent_timestamp_in_range(cid, current_time - sample_period, current_time)
-        wh, cr = get_wh_for_timestamp_and_circuit(cid, ts)
-        if wh!=None:
-            last_wh = wh;
-            last_cr = cr;
+        data_tuple = get_wh_for_timestamp_and_circuit(cid, ts)
+        if data_tuple!=None:
+            last_data_tuple = data_tuple;
         else:
             print '*',
-            wh = last_wh;
-            cr = last_cr;
-        print wh, cr
+            data_tuple = last_data_tuple
+        print data_tuple
     current_time += sample_period
