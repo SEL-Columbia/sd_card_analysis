@@ -1,3 +1,4 @@
+from __future__ import print_function
 '''
 assumes:
 have data for circuit before first sample
@@ -90,24 +91,20 @@ datestamps = [datetime(2011,9,1),
               datetime(2011,9,5)]
 
 timeStart = datetime(2011,9,2)
-timeEnd   = datetime(2011,9,9)
+timeEnd   = datetime(2011,9,4)
 
 current_time = timeStart
 sample_period = timedelta(hours = 1)
 
-while current_time < timeEnd:
+while current_time <= timeEnd:
     for cid in range(1,2):
-        print str(current_time) + ',',
-        print str(cid) + ',',
+        print(str(current_time), cid, sep=',', end='')
         ts = get_most_recent_timestamp_in_range(cid, current_time - sample_period, current_time)
-        data_tuple = get_wh_for_timestamp_and_circuit(cid, ts)
-        write_to_db_out(ts, data_tuple)
+        data_tuple = get_data_for_timestamp_and_circuit(cid, ts)
+        #write_to_db_out(ts, data_tuple)
         if data_tuple!=None:
             last_data_tuple = data_tuple;
         else:
-            #print '*',
             data_tuple = last_data_tuple
-        for val in data_tuple:
-            print str(val) + ',',
-        print
+        print(*data_tuple, sep=',')
     current_time += sample_period
