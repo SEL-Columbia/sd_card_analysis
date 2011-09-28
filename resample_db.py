@@ -33,8 +33,10 @@ import sqlite3
 from datetime import datetime
 from datetime import timedelta
 
+
 db='ml01.db'
 db_out = 'test.db'
+csv_out = 'test.csv'
 
 #select max(timestamp) from logs where timestamp>='2011-09-08 08:00:00' and timestamp<='2011-09-08 09:00:00' and circuitid=4;
 
@@ -83,7 +85,7 @@ def get_data_for_timestamp_and_circuit(circuit, timestamp):
     cur.execute(sql)
     row = cur.fetchone()
     if row!=None:
-        return row[0], row[1]
+        return row
     else:
         return None
 
@@ -109,9 +111,13 @@ print(script_begin)
 current_time = timeStart
 sample_period = timedelta(hours = 1)
 
+fout = open(csv_out, 'w')
+
 while current_time <= timeEnd:
     for cid in range(1,2):
-        print(str(current_time), cid, sep=',', end='')
+        print(str(current_time))
+        print(str(current_time), end=',', file=fout)
+        print(str(cid), end=',', file=fout)
         ts = get_most_recent_timestamp_in_range(cid, current_time - sample_period, current_time)
         data_tuple = get_data_for_timestamp_and_circuit(cid, ts)
         #write_to_db_out(ts, data_tuple)
@@ -119,5 +125,10 @@ while current_time <= timeEnd:
             last_data_tuple = data_tuple;
         else:
             data_tuple = last_data_tuple
-        print(*data_tuple, sep=',')
+        print(*data_tuple, sep=',', file=fout)
     current_time += sample_period
+
+fout.close()
+
+script_end = datetime.now()
+print (script_end - script_begin).total_seconds()
