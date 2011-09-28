@@ -100,8 +100,11 @@ datestamps = [datetime(2011,9,1),
               datetime(2011,9,4),
               datetime(2011,9,5)]
 
-timeStart = datetime(2011,9,2)
-timeEnd   = datetime(2011,9,4)
+timeStart = datetime(2011,8,2)
+timeEnd   = datetime(2011,9,1)
+
+script_begin = datetime.now()
+print(script_begin)
 
 current_time = timeStart
 sample_period = timedelta(hours = 1)
