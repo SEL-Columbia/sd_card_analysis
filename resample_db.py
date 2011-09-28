@@ -36,7 +36,7 @@ from datetime import timedelta
 
 db='ml01.db'
 db_out = 'test.db'
-csv_out = 'test.csv'
+csv_out = 'ml01_hourly.csv'
 
 #select max(timestamp) from logs where timestamp>='2011-09-08 08:00:00' and timestamp<='2011-09-08 09:00:00' and circuitid=4;
 
@@ -84,6 +84,7 @@ def get_data_for_timestamp_and_circuit(circuit, timestamp):
     #for row in con.execute(sql):
     cur.execute(sql)
     row = cur.fetchone()
+    con.close()
     if row!=None:
         return row
     else:
@@ -108,13 +109,13 @@ timeEnd   = datetime(2011,9,1)
 script_begin = datetime.now()
 print(script_begin)
 
-current_time = timeStart
-sample_period = timedelta(hours = 1)
 
 fout = open(csv_out, 'w')
 
-while current_time <= timeEnd:
-    for cid in range(1,2):
+for cid in range(1,22):
+    current_time = timeStart
+    sample_period = timedelta(hours = 1)
+    while current_time <= timeEnd:
         print(str(current_time))
         print(str(current_time), end=',', file=fout)
         print(str(cid), end=',', file=fout)
@@ -126,9 +127,9 @@ while current_time <= timeEnd:
         else:
             data_tuple = last_data_tuple
         print(*data_tuple, sep=',', file=fout)
-    current_time += sample_period
+        current_time += sample_period
 
 fout.close()
 
 script_end = datetime.now()
-print (script_end - script_begin).total_seconds()
+print (script_end - script_begin)
