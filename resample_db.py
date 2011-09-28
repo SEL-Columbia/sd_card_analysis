@@ -58,12 +58,22 @@ def get_most_recent_timestamp_in_range(circuit,
 
     return ts
 '''
-return the values for a circuit and timestamp
+return all values for a circuit and timestamp from the database as tuple
 '''
-def get_wh_for_timestamp_and_circuit(circuit, timestamp):
+def get_data_for_timestamp_and_circuit(circuit, timestamp):
     con = sqlite3.connect(db, detect_types=sqlite3.PARSE_COLNAMES)
     cur = con.cursor()
-    sql = '''select watthours_today, credit
+    sql = '''select watts,
+                    volts,
+                    amps,
+                    watthours_sc20,
+                    watthours_today,
+                    powerfactor,
+                    frequency,
+                    voltamps,
+                    status,
+                    machineid,
+                    credit
              from logs
              where circuitid=%s
              and timestamp='%s';
