@@ -67,6 +67,43 @@ def getDecimatedDataForCircuit(circuit,
     watts = watts[index]
     return dates, data, credit, watts
 
+def graph_credit(circuit,
+                 timeStart=datetime(2011, 8, 1),
+                 timeEnd=datetime(2011, 9, 1),
+                 plot_file_name=None):
+    dates, data, credit, watts = getRawDataForCircuit(circuit, timeStart, timeEnd)
+    dates = matplotlib.dates.date2num(dates)
+
+    fig = plt.figure()
+    ax = fig.add_axes((0.1,0.2,0.8,0.7))
+    ax.plot_date(dates, credit, 'kx')
+    ax.set_ylabel("Credit")
+    ax.set_xlabel("Time (hours passed)")
+    ax.set_title(db + "\nCircuit %s between %s and %s" % (circuit, timeStart, timeEnd))
+    fig.autofmt_xdate()
+    if plot_file_name==None:
+        plot_file_name = db + '_' + str(circuit) + '_credit.pdf'
+    fig.savefig(plot_file_name)
+
+def graph_power(circuit,
+                 timeStart=datetime(2011, 8, 1),
+                 timeEnd=datetime(2011, 9, 1),
+                 plot_file_name=None):
+    dates, data, credit, watts = getRawDataForCircuit(circuit, timeStart, timeEnd)
+    dates = matplotlib.dates.date2num(dates)
+
+    fig = plt.figure()
+    ax = fig.add_axes((0.1,0.2,0.8,0.7))
+    ax.plot_date(dates, watts, 'kx')
+    ax.set_ylabel("Power")
+    ax.set_xlabel("Time (hours passed)")
+    ax.set_title(db + "\nCircuit %s between %s and %s" % (circuit, timeStart, timeEnd))
+    fig.autofmt_xdate()
+    if plot_file_name==None:
+        plot_file_name = db + '_' + str(circuit) + '_power.pdf'
+    fig.savefig(plot_file_name)
+
+
 '''
 simple plotting of watthour samples for circuit over a specified date range
 '''
@@ -79,7 +116,6 @@ def graphDailyWattHours(circuit,
     #dates, data, credit, watts = getDecimatedDataForCircuit(circuit, timeStart, timeEnd)
     dates = matplotlib.dates.date2num(dates)
 
-    print "plotting"
     fig = plt.figure()
     ax = fig.add_axes((0.1,0.2,0.8,0.7))
     ax.plot_date(dates, data, 'kx')
@@ -93,8 +129,9 @@ def graphDailyWattHours(circuit,
         plot_file_name = db + '_' + str(circuit) + '.pdf'
     fig.savefig(plot_file_name)
 
-    print "done."
-
 #dates, data, credit, watts = getRawDataForCircuit(1)
 for cid in range(1,22):
+    print cid
     graphDailyWattHours(cid, datetime(2011, 8, 1), datetime(2011, 9, 1))
+    graph_credit(cid, datetime(2011, 8, 1), datetime(2011, 9, 1))
+    graph_power(cid, datetime(2011, 8, 1), datetime(2011, 9, 1))
