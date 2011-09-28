@@ -1,10 +1,15 @@
-
 import sqlite3, sys
 from datetime import datetime
 from datetime import timedelta
 import matplotlib.pyplot as plt
 import matplotlib.dates
 import numpy
+
+'''
+these functions allow for pulling data from the database and plotting it.
+these functions are written to allow pulling from either the raw database
+or the decimated/resampled database.
+'''
 
 # specify database here
 db = 'test.db'
