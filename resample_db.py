@@ -33,6 +33,7 @@ from datetime import datetime
 from datetime import timedelta
 
 db='ml01.db'
+db_out = 'test.db'
 
 #select max(timestamp) from logs where timestamp>='2011-09-08 08:00:00' and timestamp<='2011-09-08 09:00:00' and circuitid=4;
 
@@ -74,6 +75,13 @@ def get_wh_for_timestamp_and_circuit(circuit, timestamp):
         return row[0], row[1]
     else:
         return None
+
+'''
+takes a row and writes it to database
+note: incomplete
+'''
+def write_to_db_out(ts, data_tuple):
+    pass
 
 datestamps = [datetime(2011,9,1),
               datetime(2011,9,2),
