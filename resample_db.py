@@ -107,8 +107,8 @@ note: incomplete
 def write_to_db_out(ts, data_tuple):
     pass
 
-def output_sampled_watthours(time_start=datetime(2011,8,27),
-                             time_end=datetime(2011,8,28),
+def output_sampled_watthours(time_start=datetime(2011,8,2),
+                             time_end=datetime(2011,9,1),
                              csv_out=None,
                              # placeholder for when we use dicts
                              quantity='watthours_sc20'):
@@ -118,6 +118,9 @@ def output_sampled_watthours(time_start=datetime(2011,8,27),
 
     circuits = range(1, 22)
 
+    # this is to keep the database in the same format i've been using (ts, watthours, credit, watts)
+    dummy_value = 0
+
     last_watt_hours = {}
     for cid in circuits:
         last_watt_hours[cid] = 0
@@ -126,22 +129,28 @@ def output_sampled_watthours(time_start=datetime(2011,8,27),
     sample_period = timedelta(hours = 1)
     while current_time <= time_end:
         ts_dict = get_most_recent_timestamps_in_range(current_time - sample_period, current_time)
-        # if ts_dict is empty do nothing
-        # if ts_dict exists, stuff existing values and interpolate others as appropriate
         # i.e. watt hours is ok to interpolate, volts or watts is not
 
-        for cid in range(1,22):
-            print(str(current_time))
-            print(str(current_time), end=',', file=fout)
-            print(str(cid), end=',', file=fout)
+        if current_time.hour == 1:
+            for cid in circuits:
+                last_watt_hours[cid] = 0
 
-            if cid in ts_dict.keys():
-                data_tuple = get_data_for_timestamp_and_circuit(cid, ts_dict[cid])
-                watthours = data_tuple[4];
-                last_watt_hours[cid] = watthours;
-            else:
-                watthours = last_watt_hours[cid]
-            print(watthours, sep=',', file=fout)
+        # if ts_dict is empty do nothing
+        # if ts_dict exists, stuff existing values and interpolate others as appropriate
+        if len(ts_dict.keys()) != 0:
+            for cid in range(1,22):
+                print(str(current_time))
+                print(str(current_time), end=',', file=fout)
+                print(str(cid), end=',', file=fout)
+
+                if cid in ts_dict.keys():
+                    data_tuple = get_data_for_timestamp_and_circuit(cid, ts_dict[cid])
+                    watthours = data_tuple[4];
+                    last_watt_hours[cid] = watthours;
+                else:
+                    watthours = last_watt_hours[cid]
+
+                print(watthours, sep=',', file=fout)
         current_time += sample_period
 
 
