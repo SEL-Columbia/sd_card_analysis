@@ -12,7 +12,7 @@ or the decimated/resampled database.
 '''
 
 # specify database here
-db = 'ml01_hourly.db'
+db = 'ml01.db'
 #db = './data/ml06/ml06.db'
 
 '''
@@ -48,6 +48,30 @@ def getRawDataForCircuit(circuit,
     credit = numpy.array(credit)
     watts = numpy.array(watts)
     return dates, data, credit, watts
+
+def get_watthours_for_circuit(cid,
+                              time_start=datetime(2011,8,1),
+                              time_end=datetime(2011,9,1)):
+    con = sqlite3.connect(db, detect_types = sqlite3.PARSE_COLNAMES)
+    sql = """select timestamp as 'ts [timestamp]',watthours
+             from hourly_watthours
+             where circuitid=%s
+             and timestamp between '%s' and '%s'
+             order by timestamp asc;""" % (cid, time_start, time_end)
+
+    dates = []
+    watthours = []
+
+    for i, row in enumerate(con.execute(sql)):
+        dates.append(row[0])
+        watthours.append(row[1])
+    con.close()
+
+    # what if no data?
+
+    dates = numpy.array(dates)
+    watthours = numpy.array(watthours)
+    return dates, watthours
 
 '''
 this method reduces the amount of data returned from the database by
@@ -107,21 +131,18 @@ def graph_power(circuit,
 '''
 simple plotting of watthour samples for circuit over a specified date range
 '''
-def graphDailyWattHours(circuit,
+def graph_watthours(circuit,
                         timeStart=datetime(2011, 8, 1),
                         timeEnd=datetime(2011, 9, 1),
                         plot_file_name=None):
 
-    dates, data, credit, watts = getRawDataForCircuit(circuit, timeStart, timeEnd)
-    #dates, data, credit, watts = getDecimatedDataForCircuit(circuit, timeStart, timeEnd)
+    dates, watthours = get_watthours_for_circuit(circuit, timeStart, timeEnd)
     dates = matplotlib.dates.date2num(dates)
 
     fig = plt.figure()
     ax = fig.add_axes((0.1,0.2,0.8,0.7))
-    ax.plot_date(dates, data, 'kx')
-    #ax.plot_date(dates, credit, 'kx')
+    ax.plot_date(dates, watthours, 'kx')
     ax.set_ylabel("Watt Hours")
-    #ax.set_ylabel("Credit")
     ax.set_xlabel("Time (hours passed)")
     ax.set_title(db + "\nCircuit %s between %s and %s" % (circuit, timeStart, timeEnd))
     fig.autofmt_xdate()
@@ -132,6 +153,6 @@ def graphDailyWattHours(circuit,
 #dates, data, credit, watts = getRawDataForCircuit(1)
 for cid in range(1,22):
     print cid
-    graphDailyWattHours(cid, datetime(2011, 8, 1), datetime(2011, 9, 1))
-    graph_credit(cid, datetime(2011, 8, 1), datetime(2011, 9, 1))
-    graph_power(cid, datetime(2011, 8, 1), datetime(2011, 9, 1))
+    graph_watthours(cid, datetime(2011, 8, 1), datetime(2011, 9, 1))
+    #graph_credit(cid, datetime(2011, 8, 1), datetime(2011, 9, 1))
+    #graph_power(cid, datetime(2011, 8, 1), datetime(2011, 9, 1))
