@@ -49,6 +49,10 @@ def getRawDataForCircuit(circuit,
     watts = numpy.array(watts)
     return dates, data, credit, watts
 
+'''
+this function queries the hourly_watthours table for values between
+time_start and time_end for watthour data
+'''
 def get_watthours_for_circuit(cid,
                               time_start=datetime(2011,8,1),
                               time_end=datetime(2011,9,1)):
@@ -153,6 +157,6 @@ def graph_watthours(circuit,
 #dates, data, credit, watts = getRawDataForCircuit(1)
 for cid in range(1,22):
     print cid
-    graph_watthours(cid, datetime(2011, 8, 1), datetime(2011, 9, 1))
+    graph_watthours(cid, datetime(2011, 8, 14), datetime(2011, 9, 1))
     #graph_credit(cid, datetime(2011, 8, 1), datetime(2011, 9, 1))
     #graph_power(cid, datetime(2011, 8, 1), datetime(2011, 9, 1))
