@@ -94,6 +94,7 @@ def get_data_for_timestamp_and_circuit(circuit, timestamp):
     cur.execute(sql)
     row = cur.fetchone()
     con.close()
+    # fixme: this should return dict
     if row!=None:
         return row
     else:
@@ -106,39 +107,60 @@ note: incomplete
 def write_to_db_out(ts, data_tuple):
     pass
 
-datestamps = [datetime(2011,9,1),
-              datetime(2011,9,2),
-              datetime(2011,9,3),
-              datetime(2011,9,4),
-              datetime(2011,9,5)]
+def output_sampled_watthours(time_start=datetime(2011,8,27),
+                             time_end=datetime(2011,8,28),
+                             csv_out=None,
+                             # placeholder for when we use dicts
+                             quantity='watthours_sc20'):
+    if csv_out == None:
+        csv_out = 'csv_out.csv'
+    fout = open(csv_out, 'w')
 
-timeStart = datetime(2011,8,2)
-timeEnd   = datetime(2011,9,1)
+    circuits = range(1, 22)
 
-script_begin = datetime.now()
-print(script_begin)
+    last_watt_hours = {}
+    for cid in circuits:
+        last_watt_hours[cid] = 0
 
-
-fout = open(csv_out, 'w')
-
-for cid in range(1,22):
-    current_time = timeStart
+    current_time = time_start
     sample_period = timedelta(hours = 1)
-    while current_time <= timeEnd:
-        print(str(current_time))
-        print(str(current_time), end=',', file=fout)
-        print(str(cid), end=',', file=fout)
-        ts = get_most_recent_timestamp_in_range(cid, current_time - sample_period, current_time)
-        data_tuple = get_data_for_timestamp_and_circuit(cid, ts)
-        #write_to_db_out(ts, data_tuple)
-        if data_tuple!=None:
-            last_data_tuple = data_tuple;
-        else:
-            data_tuple = last_data_tuple
-        print(*data_tuple, sep=',', file=fout)
+    while current_time <= time_end:
+        ts_dict = get_most_recent_timestamps_in_range(current_time - sample_period, current_time)
+        # if ts_dict is empty do nothing
+        # if ts_dict exists, stuff existing values and interpolate others as appropriate
+        # i.e. watt hours is ok to interpolate, volts or watts is not
+
+        for cid in range(1,22):
+            print(str(current_time))
+            print(str(current_time), end=',', file=fout)
+            print(str(cid), end=',', file=fout)
+
+            if cid in ts_dict.keys():
+                data_tuple = get_data_for_timestamp_and_circuit(cid, ts_dict[cid])
+                watthours = data_tuple[4];
+                last_watt_hours[cid] = watthours;
+            else:
+                watthours = last_watt_hours[cid]
+            print(watthours, sep=',', file=fout)
         current_time += sample_period
 
-fout.close()
 
-script_end = datetime.now()
-print (script_end - script_begin)
+    fout.close()
+
+
+if __name__ == "__main__":
+
+    timeStart = datetime(2011,8,2)
+    timeEnd   = datetime(2011,9,1)
+
+    script_begin = datetime.now()
+    print(script_begin)
+    fout = open(csv_out, 'w')
+
+    # variables for logic to deal with missing samples
+    INTERPOLATE = 0
+    IGNORE = 1
+    NONE_DATA_METHOD = IGNORE
+
+    script_end = datetime.now()
+    print (script_end - script_begin)
