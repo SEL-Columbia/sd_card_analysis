@@ -40,25 +40,34 @@ csv_out = 'ml01_hourly.csv'
 
 #select max(timestamp) from logs where timestamp>='2011-09-08 08:00:00' and timestamp<='2011-09-08 09:00:00' and circuitid=4;
 
-'''
-query the database and return the most recent timestamp
-for a circuit in a certain date range
-'''
-def get_most_recent_timestamp_in_range(circuit,
-                                       timeStart=datetime(2011,9,1),
-                                       timeEnd=datetime(2011,9,2)):
-    con = sqlite3.connect(db, detect_types=sqlite3.PARSE_COLNAMES)
-    sql = '''select max(timestamp)
-             from logs
-             where circuitid=%s
-             and timestamp between '%s' and '%s';
-          ''' %(circuit,timeStart,timeEnd)
+#select circuitid, max(timestamp)
+#from logs
+#where timestamp>='2011-09-08 08:00:00' and timestamp<='2011-09-08 09:00:00'
+#group by circuitid;
 
+'''
+query the database and return the most recent timestamps by circuitid
+for a given date range
+returns a list of lists with circuitid and most recent timestamp
+'''
+def get_most_recent_timestamps_in_range(timeStart=datetime(2011,9,1,0),
+                                       timeEnd=datetime(2011,9,2,1)):
+    con = sqlite3.connect(db, detect_types=sqlite3.PARSE_COLNAMES)
+    # query database for table of circuits and last reported times in reporting interval
+    sql = '''select circuitid, max(timestamp)
+             from logs
+             where timestamp between '%s' and '%s'
+             group by circuitid;
+          ''' %(timeStart,timeEnd)
+
+
+    values_dict = {}
     for row in con.execute(sql):
-        ts = row[0]
+        values_dict[int(row[0])] = str(row[1])
     con.close()
 
-    return ts
+    return values_dict
+
 '''
 return all values for a circuit and timestamp from the database as tuple
 '''
