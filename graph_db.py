@@ -154,9 +154,50 @@ def graph_watthours(circuit,
         plot_file_name = db + '_' + str(circuit) + '.pdf'
     fig.savefig(plot_file_name)
 
+def calculate_single_day_watthours(circuit=1,
+                                   day=datetime(2011,8,31)):
+    con = sqlite3.connect(db, detect_types=sqlite3.PARSE_COLNAMES)
+    cur = con.cursor()
+    sql = '''
+          select count(*), max(watthours)
+          from hourly_watthours
+          where timestamp>'%s'
+          and timestamp<='%s' and circuitid=%s;
+          ''' %(day, day+timedelta(days=1), circuit)
+
+    #for row in con.execute(sql):
+    cur.execute(sql)
+    row = cur.fetchone()
+    con.close()
+    return_dict = {'num_samples':row[0],
+                   'max_watthours':row[1]}
+    return return_dict
+
+def calculate_average_daily_watthours(circuit=1,
+                                      time_start=datetime(2011,8,14),
+                                      time_end=datetime(2011,8,31),
+                                      minimum_samples=24):
+    current_date = time_start
+    number_valid_samples = 0
+    total_energy = 0
+    print 'circuitid, timestamp, watthours, num_hours'
+    while current_date <= time_end:
+        rd = calculate_single_day_watthours(circuit, current_date)
+        if rd['num_samples'] >= minimum_samples:
+            number_valid_samples += 1
+            total_energy += rd['max_watthours']
+
+        #print rd['num_samples'], rd['max_watthours']
+        current_date += timedelta(days=1)
+    average_watthours = total_energy / number_valid_samples
+    print circuit, 'average', average_watthours, 'num_days', number_valid_samples
+
+
 #dates, data, credit, watts = getRawDataForCircuit(1)
 for cid in range(1,22):
-    print cid
-    graph_watthours(cid, datetime(2011, 8, 14), datetime(2011, 9, 1))
+    pass
+    #print cid
+    calculate_average_daily_watthours(circuit=cid)
+    #graph_watthours(cid, datetime(2011, 8, 14), datetime(2011, 9, 1))
     #graph_credit(cid, datetime(2011, 8, 1), datetime(2011, 9, 1))
     #graph_power(cid, datetime(2011, 8, 1), datetime(2011, 9, 1))
