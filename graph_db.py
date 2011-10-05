@@ -145,7 +145,7 @@ def graph_watthours(circuit,
 
     fig = plt.figure()
     ax = fig.add_axes((0.1,0.2,0.8,0.7))
-    ax.plot_date(dates, watthours, 'kx')
+    ax.plot_date(dates, watthours, 'kx-')
     ax.set_ylabel("Watt Hours")
     ax.set_xlabel("Time (hours passed)")
     ax.set_title(db + "\nCircuit %s between %s and %s" % (circuit, timeStart, timeEnd))
