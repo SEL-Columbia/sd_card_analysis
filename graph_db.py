@@ -1,9 +1,11 @@
+from __future__ import print_function
 import sqlite3, sys
 from datetime import datetime
 from datetime import timedelta
 import matplotlib.pyplot as plt
 import matplotlib.dates
-import numpy
+import numpy as np
+import dateutil
 
 '''
 these functions allow for pulling data from the database and plotting it.
@@ -173,31 +175,89 @@ def calculate_single_day_watthours(circuit=1,
                    'max_watthours':row[1]}
     return return_dict
 
-def calculate_average_daily_watthours(circuit=1,
-                                      time_start=datetime(2011,8,14),
-                                      time_end=datetime(2011,8,31),
-                                      minimum_samples=24):
+def output_daily_watthours(circuit=1,
+                           time_start=datetime(2011,8,14),
+                           time_end=datetime(2011,8,31),
+                           minimum_samples=24):
     current_date = time_start
-    number_valid_samples = 0
-    total_energy = 0
-    print 'circuitid, timestamp, watthours, num_hours'
+    # header is 'circuitid, timestamp, watthours, num_hours'
     while current_date <= time_end:
         rd = calculate_single_day_watthours(circuit, current_date)
-        if rd['num_samples'] >= minimum_samples:
-            number_valid_samples += 1
-            total_energy += rd['max_watthours']
-
-        #print rd['num_samples'], rd['max_watthours']
+        if rd['num_samples'] > 0:
+            print(*('ml01',circuit, str(current_date), rd['max_watthours'], rd['num_samples']),
+                  sep=',', file=fout)
         current_date += timedelta(days=1)
-    average_watthours = total_energy / number_valid_samples
-    print circuit, 'average', average_watthours, 'num_days', number_valid_samples
 
+def get_daily_watthours_from_db(circuit=1,
+                                time_start=datetime(2011,8,14),
+                                time_end=datetime(2011,8,31)):
+    con = sqlite3.connect(db, detect_types=sqlite3.PARSE_COLNAMES)
+    cur = con.cursor()
+    sql = '''
+          select timestamp, watthours, numsamples
+          from daily_watthours
+          where timestamp>='%s'
+          and timestamp<='%s' and circuitid=%s;
+          ''' %(time_start, time_end, circuit)
 
-#dates, data, credit, watts = getRawDataForCircuit(1)
-for cid in range(1,22):
-    pass
-    #print cid
-    calculate_average_daily_watthours(circuit=cid)
-    #graph_watthours(cid, datetime(2011, 8, 14), datetime(2011, 9, 1))
-    #graph_credit(cid, datetime(2011, 8, 1), datetime(2011, 9, 1))
-    #graph_power(cid, datetime(2011, 8, 1), datetime(2011, 9, 1))
+    timestamp = []
+    watthours = []
+    numsamples = []
+    for row in con.execute(sql):
+        #cur.execute(sql)
+        #row = cur.fetchone()
+        timestamp.append(row[0])
+        watthours.append(row[1])
+        numsamples.append(row[2])
+    con.close()
+    return_dict = {'timestamp':timestamp,
+                   'watthours':watthours,
+                   'numsamples':numsamples}
+    return return_dict
+
+def plot_daily_watthours(circuit=1,
+                         time_start=datetime(2011,8,1),
+                         time_end=datetime(2011,8,31),
+                         plot_file_name=None):
+    data_dict = get_daily_watthours_from_db(circuit=circuit,
+                                            time_start=time_start,
+                                            time_end=time_end)
+    dates = map(dateutil.parser.parse, data_dict['timestamp'])
+    dates = matplotlib.dates.date2num(dates)
+    watthours = np.array(data_dict['watthours'])
+    numsamples = np.array(data_dict['numsamples'])
+
+    mask = numsamples == 24
+
+    # legend complete, incomplete
+    fig = plt.figure()
+    ax = fig.add_axes((0.1,0.2,0.8,0.7))
+    ax.plot_date(dates[mask], watthours[mask], 'bo', label='Complete Data')
+    ax.plot_date(dates, watthours, 'kx', label='Incomplete Data')
+    ax.set_ylabel("Daily Watt Hours")
+    ax.set_xlabel("Time")
+    ax.legend()
+    ax.grid()
+    ax.set_title(db + "\nCircuit %s between %s and %s" % (circuit, time_start, time_end))
+    fig.autofmt_xdate()
+    if plot_file_name==None:
+        plot_file_name = db + '_daily' + str(circuit) + '.pdf'
+    fig.savefig(plot_file_name)
+
+def plot_all_daily_watthours():
+    for cid in range(1, 22):
+        plot_daily_watthours(circuit=cid)
+
+if __name__ == '__main__':
+    #dates, data, credit, watts = getRawDataForCircuit(1)
+    fout = open('daily_watthours.csv', 'w')
+    for cid in range(1,22):
+        pass
+        #print cid
+        output_daily_watthours(circuit=cid,
+                               time_start=datetime(2011,8,1),
+                               time_end=datetime(2011,9,1))
+        #graph_watthours(cid, datetime(2011, 8, 14), datetime(2011, 9, 1))
+        #graph_credit(cid, datetime(2011, 8, 1), datetime(2011, 9, 1))
+        #graph_power(cid, datetime(2011, 8, 1), datetime(2011, 9, 1))
+    fout.close()
