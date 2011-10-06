@@ -11,9 +11,7 @@ watthours float,
 numsamples integer
 );
 
-
 .separator ","
 
 .import daily_watthours.csv daily_watthours
 
---create index logs_idx on logs (timestamp);
