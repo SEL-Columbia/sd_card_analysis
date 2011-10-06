@@ -1,5 +1,7 @@
 from __future__ import print_function
 '''
+python resample_db.py <mlxx.db> <hourly.csv>
+
 assumes:
 have data for circuit before first sample
 
@@ -103,10 +105,10 @@ def output_sampled_watthours(time_start=datetime(2011,8,2),
                              # placeholder for when we use dicts
                              quantity='watthours_sc20'):
     if csv_out == None:
-        csv_out = 'csv_out.csv'
+        csv_out = 'hourly_out.csv'
     fout = open(csv_out, 'w')
 
-    circuits = range(1, 22)
+    circuits = range(0, 22)
 
     # this is to keep the database in the same format i've been using (ts, watthours, credit, watts)
     dummy_value = 0
@@ -128,7 +130,7 @@ def output_sampled_watthours(time_start=datetime(2011,8,2),
         # if ts_dict is empty do nothing
         # if ts_dict exists, stuff existing values and interpolate others as appropriate
         if len(ts_dict.keys()) != 0:
-            for cid in range(1,22):
+            for cid in circuits:
                 print(str(current_time))
                 print(str(current_time), end=',', file=fout)
                 print(str(cid), end=',', file=fout)
