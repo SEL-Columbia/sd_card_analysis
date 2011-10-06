@@ -112,7 +112,7 @@ def graph_credit(circuit,
     ax.set_title(db + "\nCircuit %s between %s and %s" % (circuit, time_start, time_end))
     fig.autofmt_xdate()
     if plot_file_name==None:
-        plot_file_name = db + '_' + str(circuit) + '_credit.pdf'
+        plot_file_name = db[:-3] + '_' + str(circuit) + '_credit.pdf'
     fig.savefig(plot_file_name)
 
 def graph_power(circuit,
@@ -130,7 +130,7 @@ def graph_power(circuit,
     ax.set_title(db + "\nCircuit %s between %s and %s" % (circuit, time_start, time_end))
     fig.autofmt_xdate()
     if plot_file_name==None:
-        plot_file_name = db + '_' + str(circuit) + '_power.pdf'
+        plot_file_name = db[:-3] + '_' + str(circuit) + '_power.pdf'
     fig.savefig(plot_file_name)
 
 
@@ -182,9 +182,10 @@ def output_daily_watthours(circuit=1,
     current_date = time_start
     # header is 'circuitid, timestamp, watthours, num_hours'
     while current_date <= time_end:
+        print(current_date)
         rd = calculate_single_day_watthours(circuit, current_date)
         if rd['num_samples'] > 0:
-            print(*('ml01',circuit, str(current_date), rd['max_watthours'], rd['num_samples']),
+            print(*(db[:-3],circuit, str(current_date), rd['max_watthours'], rd['num_samples']),
                   sep=',', file=fout)
         current_date += timedelta(days=1)
 
@@ -241,11 +242,11 @@ def plot_daily_watthours(circuit=1,
     ax.set_title(db + "\nCircuit %s between %s and %s" % (circuit, time_start, time_end))
     fig.autofmt_xdate()
     if plot_file_name==None:
-        plot_file_name = db + '_daily' + str(circuit) + '.pdf'
+        plot_file_name = db[:-3] + '_daily' + str(circuit) + '.pdf'
     fig.savefig(plot_file_name)
 
 def plot_all_daily_watthours():
-    for cid in range(1, 22):
+    for cid in range(0, 23):
         plot_daily_watthours(circuit=cid)
 
 if __name__ == '__main__':
