@@ -14,7 +14,7 @@ or the decimated/resampled database.
 '''
 
 # specify database here
-db = 'ml01.db'
+db = 'ml05.db'
 #db = './data/ml06/ml06.db'
 
 '''
@@ -217,8 +217,8 @@ def get_daily_watthours_from_db(circuit=1,
     return return_dict
 
 def plot_daily_watthours(circuit=1,
-                         time_start=datetime(2011,8,1),
-                         time_end=datetime(2011,8,31),
+                         time_start=datetime(2011,6,1),
+                         time_end=datetime(2011,10,1),
                          plot_file_name=None):
     data_dict = get_daily_watthours_from_db(circuit=circuit,
                                             time_start=time_start,
@@ -255,13 +255,13 @@ if __name__ == '__main__':
     file_out = args[1]
 
     #dates, data, credit, watts = getRawDataForCircuit(1)
-    fout = open('daily_watthours.csv', 'w')
-    for cid in range(1,22):
+    fout = open(file_out, 'w')
+    for cid in range(0,22):
         pass
         #print cid
         output_daily_watthours(circuit=cid,
-                               time_start=datetime(2011,8,1),
-                               time_end=datetime(2011,9,1))
+                               time_start=datetime(2011,1,1),
+                               time_end=datetime(2011,12,1))
         #graph_watthours(cid, datetime(2011, 8, 14), datetime(2011, 9, 1))
         #graph_credit(cid, datetime(2011, 8, 1), datetime(2011, 9, 1))
         #graph_power(cid, datetime(2011, 8, 1), datetime(2011, 9, 1))
