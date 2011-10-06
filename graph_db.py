@@ -249,6 +249,10 @@ def plot_all_daily_watthours():
         plot_daily_watthours(circuit=cid)
 
 if __name__ == '__main__':
+    args = sys.argv[1:]
+    db = args[0]
+    file_out = args[1]
+
     #dates, data, credit, watts = getRawDataForCircuit(1)
     fout = open('daily_watthours.csv', 'w')
     for cid in range(1,22):

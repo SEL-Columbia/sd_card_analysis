@@ -32,18 +32,8 @@ select timestamp from logs where timestamp>'2011-08-01 00:00:00' and timestamp<'
 import sqlite3
 from datetime import datetime
 from datetime import timedelta
+import sys
 
-
-db='ml01.db'
-db_out = 'test.db'
-csv_out = 'ml01_hourly.csv'
-
-#select max(timestamp) from logs where timestamp>='2011-09-08 08:00:00' and timestamp<='2011-09-08 09:00:00' and circuitid=4;
-
-#select circuitid, max(timestamp)
-#from logs
-#where timestamp>='2011-09-08 08:00:00' and timestamp<='2011-09-08 09:00:00'
-#group by circuitid;
 
 '''
 query the database and return the most recent timestamps by circuitid
@@ -159,17 +149,11 @@ def output_sampled_watthours(time_start=datetime(2011,8,2),
 
 if __name__ == "__main__":
 
-    timeStart = datetime(2011,8,2)
-    timeEnd   = datetime(2011,9,1)
+    args = sys.argv[1:]
+    time_start = datetime(2011,1,1)
+    time_end   = datetime(2011,12,1)
 
-    script_begin = datetime.now()
-    print(script_begin)
-    fout = open(csv_out, 'w')
+    db = args[0]
+    csv_out = args[1]
 
-    # variables for logic to deal with missing samples
-    INTERPOLATE = 0
-    IGNORE = 1
-    NONE_DATA_METHOD = IGNORE
-
-    script_end = datetime.now()
-    print (script_end - script_begin)
+    output_sampled_watthours(time_start, time_end, csv_out=csv_out)
