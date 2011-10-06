@@ -20,7 +20,6 @@ class SQLQueries:
 
     create_logs_table = '''
                         CREATE TABLE logs (
-                        logid INTEGER PRIMARY KEY AUTOINCREMENT,
                         circuitid INTEGER,
                         timestamp TIMESTAMP,
                         watts FLOAT,
@@ -46,7 +45,7 @@ def load_dir(data_dir, db):
     db_connection = sqlite3.connect(db)
     db_cursor = db_connection.cursor()
 
-    db_cursor.execute(SQLQueries.create_circuits_table)
+    #db_cursor.execute(SQLQueries.create_circuits_table)
     db_cursor.execute(SQLQueries.create_logs_table)
 
     circuit_ids = {}
@@ -61,15 +60,15 @@ def load_dir(data_dir, db):
             circuit_id = int(f[-6:-4])
             # is MAINS always on circuit 0?
             circuit_type = "MAINS" if circuit_id == 0 else "CONSUMER"
-            if circuit_id not in circuit_ids:
-                db_cursor.execute("INSERT INTO circuits (circuit, type) VALUES(?,?)",
-                                  (circuit_id, circuit_type))
-                circuit_index += 1
-                circuit_ids[circuit_id] = circuit_index
+            #if circuit_id not in circuit_ids:
+                #db_cursor.execute("INSERT INTO circuits (circuit, type) VALUES(?,?)",
+                #                  (circuit_id, circuit_type))
+                #circuit_index += 1
+                #circuit_ids[circuit_id] = circuit_index
 
-            idx = circuit_ids[circuit_id]
+            #idx = circuit_ids[circuit_id]
             # does it make sense to instead store the circuit_id in the table
-            # idx = circuit_id
+            #idx = circuit_id
             log = csv.reader(open(os.path.join(root, f), 'rb'), delimiter=',')
             header = log.next()
 
@@ -96,7 +95,7 @@ def load_dir(data_dir, db):
                                    watthours_sc20, watthours_today, powerfactor, frequency,
                                    voltamps, status, machineid, credit)
                                    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)''',
-                                   (idx, timestamp, watts, volts, amps, wh_sc20,
+                                   (circuit_id, timestamp, watts, volts, amps, wh_sc20,
                                    wh_today, power_factor, frequency, volt_amps,
                                    status, machine_id, credit))
                 line_number += 1
