@@ -1,3 +1,18 @@
+12/24/11 7:02 PM
+
+most of this older work will be superseded by this work using
+a postgres database.  the database (sdcard) has one table
+with logs for all meters and circuits, rather than a collection
+of sqlite databases.
+
+
+
+
+
+--------------------------------------------------------------
+
+
+
 overall work flow for this set of scripts
 
 - use csv2db.py to create a sqlite database from the csv files
