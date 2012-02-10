@@ -1,6 +1,8 @@
 ﻿-- queries database for hourly samples
 -- and inserts into table
 
+insert into hourly_logs(
+
 select
 	-- these need to be made so that only one occurs per time sample
 	logs.meter_name,
@@ -53,3 +55,4 @@ order by
 -- 	meter_name,
 -- 	circuit_id,
  	mts
+);
