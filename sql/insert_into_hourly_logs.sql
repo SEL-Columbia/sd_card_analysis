@@ -34,10 +34,10 @@ join
 	from
 		logs
 	where
-		meter_name='ml06'
-		and circuitid=0
-		and timestamp > '2011-06-01'
-		and timestamp < '2011-06-07'
+		meter_name='ml03'
+		--and circuitid=0
+		--and timestamp > '2011-06-01'
+		--and timestamp < '2011-06-07'
 	group by
 		meter_name,
 		circuitid,
