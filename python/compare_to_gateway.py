@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 import datetime as dt
 import pandas as p
 
+# query parameters
 date_start = dt.datetime(2011, 1, 1)
 date_end = dt.datetime(2012, 2, 1)
-
 meter_name = 'ml03'
 ip_address = '192.168.1.203'
 
