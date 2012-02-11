@@ -1,7 +1,6 @@
 -- creates table in postgres sdcard database
 
-CREATE TABLE logs (
---create table hourly_logs(
+create table hourly_logs(
 meter_name TEXT,
 ip_address INTEGER,
 meter_timestamp TIMESTAMP,
