@@ -14,18 +14,6 @@ cursor = conn.cursor()
 
 
 def load_dir(data_dir):
-    '''
-    print "loading database:", db
-
-    db_connection = sqlite3.connect(db)
-    db_cursor = db_connection.cursor()
-
-    #db_cursor.execute(SQLQueries.create_circuits_table)
-    db_cursor.execute(SQLQueries.create_logs_table)
-
-    circuit_ids = {}
-    circuit_index = 0
-    '''
 
     insert_string = '''insert into logs (meter_name, ip_address, meter_timestamp, watts, volts, amps, watthours_sc20, watthours_today, powerfactor, frequency, voltamps, status, machineid, credit) values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');'''
 
@@ -39,8 +27,6 @@ def load_dir(data_dir):
 
             log = csv.reader(open(os.path.join(root, f), 'rb'), delimiter=',')
             header = log.next()
-
-
 
             line_number = 0
             for row in log:
@@ -75,7 +61,7 @@ def load_dir(data_dir):
                                        status,
                                        machine_id,
                                        credit)
-                #print(str)
+                # if there is a primary key error, rollback
                 try:
                     cursor.execute(str)
                 except psycopg2.IntegrityError:
