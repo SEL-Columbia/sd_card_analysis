@@ -21,10 +21,17 @@ def load_database_from_csv(data_directory,
     # if not in date range, break out of loop
     for dirpath, dirnames, filenames in os.walk(data_directory):
         #print dirpath, dirnames, filenames
-        dp = str(dirpath).split('/')
-        print dp
-        date = dt.datetime(dp[-4], dp[-3], dp[-2], dp[-1])
-        print date
+        for f in filenames:
+            if f.endswith('.log'):
+                dp = str(dirpath).split('/')[-4:]
+                dp = map(int, dp)
+                #print dp
+                date_start = dt.datetime(dp[-4], dp[-3], dp[-2], dp[-1])
+                date_end = date_start + dt.timedelta(hours=1)
+
+                print dirpath, date_start, date_end, f
+                read_and_sample_log_file(os.path.join(dirpath, f), date_start, date_end)
+
 
 def read_and_sample_log_file(filename, date_start, date_end, interval_seconds=60):
 
