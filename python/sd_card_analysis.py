@@ -40,22 +40,23 @@ def read_and_sample_log_file(filename, date_start, date_end, interval_seconds=60
     # if current timestamp is less than or equal to iterated timestamp
     # greater, mark blank and continue
     dr = p.DateRange(date_start, date_end, offset=p.DateOffset(seconds=5*60))
-    idx = -1
-    idxl = []
-    for d in dr:
-        while 1:
-            idx += 1
-            if idx >= len(df):
-                break
-            if df['Time Stamp'][idx] >= d:
-                idxl.append(idx)
-                print d, df['Time Stamp'][idx], df['Time Stamp'][idx] - d
-                break
+    index_list = []
+    for i in range(len(dr) - 1):
+        # get values in time range
+        mask = (df['Time Stamp'] >= dr[i]) & (df['Time Stamp'] < dr[i + 1])
+
+        # see if mask has any true values and if so, grab sample
+        if mask.any():
+            temp_frame = df[mask]
+            first_sample = min(temp_frame.index)
+            # select first value in range
+            print dr[i], df.ix[first_sample]['Time Stamp']
+            index_list.append(first_sample)
 
     # construct new data frame (ndf) from index list (idxl)
-    ndf = df.ix[idxl]
+        #ndf = df.ix[idxl]
 
-    return ndf
+    #return ndf
 
 # data retrieval
 def get_watthours_sc20(meter_name, ip_address, date_start, date_end):
