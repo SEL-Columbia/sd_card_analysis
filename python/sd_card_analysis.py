@@ -1,9 +1,66 @@
 import sqlalchemy as sa
 import pandas as p
+import datetime as dt
+import os
+import dateutil
 
+# data import
+def load_database_from_csv(data_directory,
+                           date_start=dt.datetime(2012,1,1),
+                           date_end=dt.datetime(2012,2,1)):
+    # objects to connect to database
+    # metadata = sa.MetaData('postgres://postgres:postgres@localhost:5432/sdcard')
+
+    # walk file structure
+
+    # import pandas file
+
+    # decimate based on timestamp (dealing with duplicates)
+
+    # build date from from directories
+    # if not in date range, break out of loop
+    for dirpath, dirnames, filenames in os.walk(data_directory):
+        #print dirpath, dirnames, filenames
+        dp = str(dirpath).split('/')
+        print dp
+        date = dt.datetime(dp[-4], dp[-3], dp[-2], dp[-1])
+        print date
+
+def read_and_sample_log_file(filename, date_start, date_end, interval_seconds=60):
+
+    # load file
+    #df = p.read_csv('../data/ml03/2012/01/01/20/192_168_1_200.log')
+    df = p.read_csv(filename)
+
+    # map datetime object onto timestamp column
+    df['Time Stamp'] = df['Time Stamp'].map(str)
+    df['Time Stamp'] = df['Time Stamp'].map(dateutil.parser.parse)
+
+    # create pandas date range and iterate
+    # if current timestamp is less than or equal to iterated timestamp
+    # greater, mark blank and continue
+    dr = p.DateRange(date_start, date_end, offset=p.DateOffset(seconds=5*60))
+    idx = -1
+    idxl = []
+    for d in dr:
+        while 1:
+            idx += 1
+            if idx >= len(df):
+                break
+            if df['Time Stamp'][idx] >= d:
+                idxl.append(idx)
+                print d, df['Time Stamp'][idx], df['Time Stamp'][idx] - d
+                break
+
+    # construct new data frame (ndf) from index list (idxl)
+    ndf = df.ix[idxl]
+
+    return ndf
+
+# data retrieval
 def get_watthours_sc20(meter_name, ip_address, date_start, date_end):
     metadata = sa.MetaData('postgres://postgres:postgres@localhost:5432/sdcard')
-    t = sa.Table('hourly_logs', metadata, autoload=True)
+    t = sa.Table('logs', metadata, autoload=True)
     wh_column = t.c.watthours_sc20
     query = sa.select([wh_column,
                        #t.c.credit,
