@@ -7,15 +7,9 @@ import dateutil
 # data import
 def load_database_from_csv(data_directory,
                            date_start=dt.datetime(2012,1,1),
-                           date_end=dt.datetime(2012,2,1)):
-    # objects to connect to database
-    # metadata = sa.MetaData('postgres://postgres:postgres@localhost:5432/sdcard')
+                           date_end=dt.datetime(2012,1,2)):
+    # TODO: restrict loop to dates within range
 
-    # walk file structure
-
-    # import pandas file
-
-    # decimate based on timestamp (dealing with duplicates)
 
     # build date from from directories
     # if not in date range, break out of loop
@@ -26,14 +20,36 @@ def load_database_from_csv(data_directory,
                 dp = str(dirpath).split('/')[-4:]
                 dp = map(int, dp)
                 #print dp
-                date_start = dt.datetime(dp[-4], dp[-3], dp[-2], dp[-1])
-                date_end = date_start + dt.timedelta(hours=1)
+                file_date_start = dt.datetime(dp[-4], dp[-3], dp[-2], dp[-1])
+                file_date_end = file_date_start + dt.timedelta(hours=1)
 
-                print dirpath, date_start, date_end, f
-                read_and_sample_log_file(os.path.join(dirpath, f), date_start, date_end)
+                if file_date_end > date_end or file_date_start < date_start:
+                    continue
+                print dirpath, file_date_start, file_date_end, f
+                read_and_sample_log_file(os.path.join(dirpath, f), 
+                                         file_date_start, 
+                                         file_date_end)
 
 
-def read_and_sample_log_file(filename, date_start, date_end, interval_seconds=60):
+def read_and_sample_log_file(filename,
+                             date_start,
+                             date_end,
+                             interval_seconds=10*60,
+                             sample_method='first'):
+    '''
+    read_and_sample_log_file
+
+    input:
+    filename   : csv file to be parsed
+    date_start :
+    date_end   :
+    interval_seconds : sampling interval
+    sample_method : sampling heuristic
+                  : 'first' = use first sample in interval
+
+    output:
+    df : data frame with sampled data for hour in filename
+    '''
 
     # load file
     #df = p.read_csv('../data/ml03/2012/01/01/20/192_168_1_200.log')
@@ -46,7 +62,7 @@ def read_and_sample_log_file(filename, date_start, date_end, interval_seconds=60
     # create pandas date range and iterate
     # if current timestamp is less than or equal to iterated timestamp
     # greater, mark blank and continue
-    dr = p.DateRange(date_start, date_end, offset=p.DateOffset(seconds=5*60))
+    dr = p.DateRange(date_start, date_end, offset=p.DateOffset(seconds=interval_seconds))
     index_list = []
     for i in range(len(dr) - 1):
         # get values in time range
