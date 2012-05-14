@@ -8,8 +8,14 @@ import dateutil
 def load_database_from_csv(data_directory,
                            date_start=dt.datetime(2012,1,1),
                            date_end=dt.datetime(2012,1,2)):
-    # TODO: restrict loop to dates within range
+    '''
+    load_database_from_csv
 
+    input:
+    data_directory : top level of data_directory to be imported
+    date_start :
+    date_end :
+    '''
 
     # build date from from directories
     # if not in date range, break out of loop
@@ -26,16 +32,16 @@ def load_database_from_csv(data_directory,
                 if file_date_end > date_end or file_date_start < date_start:
                     continue
                 print dirpath, file_date_start, file_date_end, f
-                read_and_sample_log_file(os.path.join(dirpath, f), 
-                                         file_date_start, 
+                read_and_sample_log_file(os.path.join(dirpath, f),
+                                         file_date_start,
                                          file_date_end)
-
 
 def read_and_sample_log_file(filename,
                              date_start,
                              date_end,
                              interval_seconds=10*60,
-                             sample_method='first'):
+                             sample_method='first',
+                             columns=['Time Stamp', 'Watts']):
     '''
     read_and_sample_log_file
 
@@ -50,9 +56,11 @@ def read_and_sample_log_file(filename,
     output:
     df : data frame with sampled data for hour in filename
     '''
+    # TODO : return data frame with appropriate columns and circuit information
+    # TODO : add columns to dataframe for meter and circuit
+    # TODO : remove unnecessary columns from dataframe
 
     # load file
-    #df = p.read_csv('../data/ml03/2012/01/01/20/192_168_1_200.log')
     df = p.read_csv(filename)
 
     # map datetime object onto timestamp column
@@ -64,12 +72,14 @@ def read_and_sample_log_file(filename,
     # greater, mark blank and continue
     dr = p.DateRange(date_start, date_end, offset=p.DateOffset(seconds=interval_seconds))
     index_list = []
+    resample_list = []
     for i in range(len(dr) - 1):
         # get values in time range
         mask = (df['Time Stamp'] >= dr[i]) & (df['Time Stamp'] < dr[i + 1])
 
         # see if mask has any true values and if so, grab sample
         if mask.any():
+            resample_list.append(dr[i])
             temp_frame = df[mask]
             first_sample = min(temp_frame.index)
             # select first value in range
@@ -77,11 +87,11 @@ def read_and_sample_log_file(filename,
             index_list.append(first_sample)
 
     # construct new data frame (ndf) from index list (idxl)
-        #ndf = df.ix[idxl]
+    ndf = df.ix[index_list]
+    ndf = ndf[columns]
+    ndf['Resampled_Time_Stamp'] = resample_list
+    return ndf
 
-    #return ndf
-
-# data retrieval
 def get_watthours_sc20(meter_name, ip_address, date_start, date_end):
     metadata = sa.MetaData('postgres://postgres:postgres@localhost:5432/sdcard')
     t = sa.Table('logs', metadata, autoload=True)
