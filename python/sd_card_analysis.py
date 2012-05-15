@@ -7,7 +7,9 @@ import dateutil
 # data import
 def load_database_from_csv(data_directory,
                            date_start=dt.datetime(2012,1,1),
-                           date_end=dt.datetime(2012,1,2)):
+                           date_end=dt.datetime(2012,1,2),
+                           meter_name='default_meter_name',
+                           output_file='default.csv'):
     '''
     load_database_from_csv
 
@@ -19,7 +21,7 @@ def load_database_from_csv(data_directory,
     output:
     df : dataframe with resampled data from files
     '''
-    # TODO: concatenate data frames
+    # TODO: send metername and circuitid to function
 
     df = p.DataFrame()
     # build date from from directories
@@ -28,6 +30,7 @@ def load_database_from_csv(data_directory,
         #print dirpath, dirnames, filenames
         for f in filenames:
             if f.endswith('.log'):
+                circuit_id = int(f[-6:-4])
                 dp = str(dirpath).split('/')[-4:]
                 dp = map(int, dp)
                 #print dp
@@ -39,8 +42,13 @@ def load_database_from_csv(data_directory,
                 print dirpath, file_date_start, file_date_end, f
                 tdf = read_and_sample_log_file(os.path.join(dirpath, f),
                                          file_date_start,
-                                         file_date_end)
+                                         file_date_end,
+                                         meter_name=meter_name,
+                                         circuit_id=circuit_id)
                 df = p.concat([df, tdf])
+    # rewrite df to delete old index
+    df = p.DataFrame(df.values, columns=df.columns)
+    df.to_csv(output_file)
     return df
 
 def read_and_sample_log_file(filename,
@@ -99,6 +107,8 @@ def read_and_sample_log_file(filename,
     ndf = df.ix[index_list]
     ndf = ndf[columns]
     ndf['Resampled_Time_Stamp'] = resample_list
+    ndf['meter_name'] = meter_name
+    ndf['circuit_id'] = circuit_id
     return ndf
 
 def get_watthours_sc20(meter_name, ip_address, date_start, date_end):
