@@ -8,6 +8,7 @@ import dateutil
 def load_database_from_csv(data_directory,
                            date_start=dt.datetime(2012,1,1),
                            date_end=dt.datetime(2012,1,2),
+                           interval_seconds=15*60,
                            meter_name='default_meter_name',
                            output_file='default.csv'):
     '''
@@ -21,7 +22,6 @@ def load_database_from_csv(data_directory,
     output:
     df : dataframe with resampled data from files
     '''
-    # TODO: send metername and circuitid to function
 
     df = p.DataFrame()
     # build date from from directories
@@ -39,10 +39,11 @@ def load_database_from_csv(data_directory,
 
                 if file_date_end > date_end or file_date_start < date_start:
                     continue
-                print dirpath, file_date_start, file_date_end, f
+                print dirpath, f
                 tdf = read_and_sample_log_file(os.path.join(dirpath, f),
                                          file_date_start,
                                          file_date_end,
+                                         interval_seconds=interval_seconds,
                                          meter_name=meter_name,
                                          circuit_id=circuit_id)
                 df = p.concat([df, tdf])
@@ -74,8 +75,8 @@ def read_and_sample_log_file(filename,
     df : data frame with sampled data for hour in filename
     '''
     # TODO : return data frame with appropriate columns and circuit information
-    # TODO : add columns to dataframe for meter and circuit
     # TODO : remove unnecessary columns from dataframe
+    # TODO : what if file is corrupted?
 
     # load file
     df = p.read_csv(filename)
@@ -100,7 +101,7 @@ def read_and_sample_log_file(filename,
             temp_frame = df[mask]
             first_sample = min(temp_frame.index)
             # select first value in range
-            print dr[i], df.ix[first_sample]['Time Stamp']
+            #print dr[i], df.ix[first_sample]['Time Stamp']
             index_list.append(first_sample)
 
     # construct new data frame (ndf) from index list (idxl)
