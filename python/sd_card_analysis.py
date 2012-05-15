@@ -15,8 +15,13 @@ def load_database_from_csv(data_directory,
     data_directory : top level of data_directory to be imported
     date_start :
     date_end :
-    '''
 
+    output:
+    df : dataframe with resampled data from files
+    '''
+    # TODO: concatenate data frames
+
+    df = p.DataFrame()
     # build date from from directories
     # if not in date range, break out of loop
     for dirpath, dirnames, filenames in os.walk(data_directory):
@@ -32,16 +37,20 @@ def load_database_from_csv(data_directory,
                 if file_date_end > date_end or file_date_start < date_start:
                     continue
                 print dirpath, file_date_start, file_date_end, f
-                read_and_sample_log_file(os.path.join(dirpath, f),
+                tdf = read_and_sample_log_file(os.path.join(dirpath, f),
                                          file_date_start,
                                          file_date_end)
+                df = p.concat([df, tdf])
+    return df
 
 def read_and_sample_log_file(filename,
                              date_start,
                              date_end,
                              interval_seconds=10*60,
                              sample_method='first',
-                             columns=['Time Stamp', 'Watts']):
+                             columns=['Time Stamp', 'Watts'],
+                             meter_name=None,
+                             circuit_id=None):
     '''
     read_and_sample_log_file
 
