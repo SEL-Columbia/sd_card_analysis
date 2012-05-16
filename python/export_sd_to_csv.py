@@ -6,20 +6,20 @@ import datetime as dt
 # begin user configuration
 
 # specify start and end dates for imported data (yyyy, mm, dd, hh, mm)
-date_start = dt.datetime(2012, 1, 1)
-date_end   = dt.datetime(2012, 1, 2)
+date_start = dt.datetime(2011, 8, 15)
+date_end   = dt.datetime(2012, 1, 1)
 
 # specify data directory as a string ('..' means the directory one level up)
-data_directory = '../data/ml08'
+data_directory = '../data/ug02'
 
 # specify meter_name that will be included in the data and csv file
-meter_name = 'ml08'
+meter_name = 'ug02'
 
 # specify time interval in seconds that data will be sampled
 interval_seconds = 10 * 60
 
 # specify output file name can save as either .xls, .xlsx, or .csv
-output_file = 'ml08.xlsx'
+output_file = 'ug02.csv'
 
 # end user configuration
 # --------------------------------------------------------------------------
