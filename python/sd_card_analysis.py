@@ -125,7 +125,7 @@ def read_and_sample_log_file(filename,
     ndf = ndf[column_mapping.keys()]
     ndf['meter_time_stamp'] = resample_list
     ndf['meter_name'] = meter_name
-    ndf['circuit_id'] = circuit_id
+    ndf['physical_circuit'] = circuit_id
 
     # rename columns to be consistent with database labels
     ndf = ndf.rename(columns=column_mapping)
