@@ -4,20 +4,22 @@ import datetime as dt
 import os
 import dateutil
 
-# data import
-def load_database_from_csv(data_directory,
-                           date_start=dt.datetime(2012,1,1),
-                           date_end=dt.datetime(2012,1,2),
-                           interval_seconds=15*60,
-                           meter_name='default_meter_name',
-                           output_file='default.csv'):
+def export_sd_to_csv(data_directory,
+                     date_start=dt.datetime(2012,1,1),
+                     date_end=dt.datetime(2012,1,2),
+                     interval_seconds=15*60,
+                     meter_name='default_meter_name',
+                     output_file='default.csv'):
     '''
     load_database_from_csv
 
     input:
-    data_directory : top level of data_directory to be imported
-    date_start :
-    date_end :
+    data_directory   : top level of data_directory to be imported
+    date_start       :
+    date_end         :
+    interval_seconds : interval at which to attempt to sample data
+    meter_name       : string specifying name of meter to identify data
+    output_file      : string specifying name of csv output file
 
     output:
     df : dataframe with resampled data from files
