@@ -18,8 +18,8 @@ meter_name = 'ml08'
 # specify time interval in seconds that data will be sampled
 interval_seconds = 10 * 60
 
-# specify output file name
-output_file = 'ml08.csv'
+# specify output file name can save as either .xls, .xlsx, or .csv
+output_file = 'ml08.xlsx'
 
 # end user configuration
 # --------------------------------------------------------------------------

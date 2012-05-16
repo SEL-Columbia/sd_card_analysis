@@ -51,7 +51,16 @@ def export_sd_to_csv(data_directory,
                 df = p.concat([df, tdf])
     # rewrite df to delete old index
     df = p.DataFrame(df.values, columns=df.columns)
-    df.to_csv(output_file)
+
+    # write out to file depending on file extension
+    if '.xls' in output_file:
+        writer = p.ExcelWriter(output_file)
+        df.to_excel(writer, sheet_name=meter_name)
+        writer.save()
+    if '.csv' in output_file:
+        df.to_csv(output_file)
+
+    # return data frame
     return df
 
 def read_and_sample_log_file(filename,
