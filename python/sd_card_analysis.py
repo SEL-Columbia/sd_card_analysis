@@ -50,6 +50,7 @@ def export_sd_to_csv(data_directory,
                                          circuit_id=circuit_id)
                 df = p.concat([df, tdf])
     # rewrite df to delete old index
+    # this could be a performance or memory footprint problem
     df = p.DataFrame(df.values, columns=df.columns)
 
     # write out to file depending on file extension
@@ -68,7 +69,10 @@ def read_and_sample_log_file(filename,
                              date_end,
                              interval_seconds=10*60,
                              sample_method='first',
-                             columns=['Time Stamp', 'Watts'],
+                             column_mapping={'Time Stamp':'sc20_time_stamp',
+                                             'Watts':'watts',
+                                             'Volts':'volts',
+                                             'Watt Hours SC20':'watt_hours_sc20'},
                              meter_name=None,
                              circuit_id=None):
     '''
@@ -117,10 +121,15 @@ def read_and_sample_log_file(filename,
 
     # construct new data frame (ndf) from index list (idxl)
     ndf = df.ix[index_list]
-    ndf = ndf[columns]
-    ndf['Resampled_Time_Stamp'] = resample_list
+    #ndf = ndf[columns]
+    ndf = ndf[column_mapping.keys()]
+    ndf['meter_time_stamp'] = resample_list
     ndf['meter_name'] = meter_name
     ndf['circuit_id'] = circuit_id
+
+    # rename columns to be consistent with database labels
+    ndf = ndf.rename(columns=column_mapping)
+
     return ndf
 
 def get_watthours_sc20(meter_name, ip_address, date_start, date_end):
