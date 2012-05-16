@@ -79,19 +79,23 @@ def read_and_sample_log_file(filename,
     read_and_sample_log_file
 
     input:
-    filename   : csv file to be parsed
-    date_start :
-    date_end   :
+    filename         : csv file to be parsed
+    date_start       :
+    date_end         :
     interval_seconds : sampling interval
-    sample_method : sampling heuristic
-                  : 'first' = use first sample in interval
+    sample_method    : sampling heuristic
+                     : 'first' = use first sample in interval
+    column_mapping   : dictionary where keys are column names as they appear
+                       in the .log files and values are the database compliant
+                       names
+    meter_name       : string to specify meter from which data is taken
+    circuit_id       : physical circuit number in meter that file represents
 
     output:
     df : data frame with sampled data for hour in filename
     '''
-    # TODO : return data frame with appropriate columns and circuit information
-    # TODO : remove unnecessary columns from dataframe
-    # TODO : what if file is corrupted?
+    # TODO : what if file is missing header?
+    # TODO : what if line has poorly formed line?
 
     # load file
     df = p.read_csv(filename)
