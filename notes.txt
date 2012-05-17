@@ -1,0 +1,41 @@
+installation
+------------
+install pip
+install pandas
+install git
+get github account
+
+> git clone git@github.com:modilabs/sd_card_analysis.git
+
+download directory of SD card data to local hard drive
+
+configure script for importing data by opening in text editor.
+script is located in sda/python/export_sd_to_csv.py
+
+once edited, you can run this script by running
+
+> python export_sd_to_csv.py
+
+this will create an excel or csv file based on the
+data specified in the export_sd_to_csv.py file.
+
+
+troubleshooting
+---------------
+some of the log files have some sort of corruption that
+will cause the program to crash.
+when this happens make a note of the error and the last
+file listed in the program output.
+look at the folder containing the file and look for any
+issues.
+
+1) empty file
+2) missing header line
+3) malformed entry in file
+
+
+
+
+
+
+
