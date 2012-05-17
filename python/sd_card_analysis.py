@@ -47,6 +47,11 @@ def export_sd_to_csv(data_directory,
                                          file_date_end,
                                          interval_seconds=interval_seconds,
                                          meter_name=meter_name,
+                                         column_mapping={'Time Stamp':'sc20_time_stamp',
+                                             'Watts':'watts',
+                                             'Volts':'volts',
+                                             'Watt Hours SC20':'watt_hours_sc20',
+                                             'Credit':'credit'},
                                          circuit_id=circuit_id)
                 df = p.concat([df, tdf])
     # rewrite df to delete old index
@@ -72,7 +77,8 @@ def read_and_sample_log_file(filename,
                              column_mapping={'Time Stamp':'sc20_time_stamp',
                                              'Watts':'watts',
                                              'Volts':'volts',
-                                             'Watt Hours SC20':'watt_hours_sc20'},
+                                             'Watt Hours SC20':'watt_hours_sc20',
+                                             'Credit':'credit'},
                              meter_name=None,
                              circuit_id=None):
     '''
@@ -126,6 +132,9 @@ def read_and_sample_log_file(filename,
     # construct new data frame (ndf) from index list (idxl)
     ndf = df.ix[index_list]
     #ndf = ndf[columns]
+    # if mains, do not ask for credit column
+    if circuit_id==0:
+        column_mapping.pop('Credit')
     ndf = ndf[column_mapping.keys()]
     ndf['meter_time_stamp'] = resample_list
     ndf['meter_name'] = meter_name
