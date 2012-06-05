@@ -199,3 +199,56 @@ def get_watthours_today(meter_name, ip_address, date_start, date_end):
     sd = p.DataFrame(result.fetchall(), columns=result.keys())
     sd = p.Series(sd['watthours_today'], index=sd['meter_timestamp'])
     return sd
+
+def heatmap(filename,
+            truncate=None,
+            column='watts',
+            date_start=None,
+            date_end=None,
+            interval_seconds=None):
+    '''
+    takes a file output by export_sd_to_csv and writes it as a 2-d heat
+    map
+    '''
+    temp_df = p.read_csv(filename)
+
+    df = temp_df.pivot(index='meter_time_stamp',
+                       columns='physical_circuit',
+                       values=column)
+
+    '''
+    # TODO expand date index to include all dates in range
+    date_range = p.DateRange(date_start, date_end,
+                             offset=p.DateOffset(seconds=interval_seconds))
+    # apply this index to pivoted data frame
+    # dataframe.reindex exists
+    df = df.reindex(date_range)
+    '''
+
+    #pdf.pop(0)
+
+    if truncate is not None:
+        df[df > truncate] = truncate
+
+    import matplotlib.pyplot as plt
+
+    fig, ax = plt.subplots(1, 1)
+
+    import matplotlib.cm as cm
+    cmap = cm.jet
+
+    cmap.set_bad('w')
+
+    plot = ax.imshow(df, aspect='auto', interpolation='none', cmap=cmap)
+    fig.colorbar(plot)
+
+    labels = df.index
+
+    # place subsampled date labels
+    rng = range(0, len(labels), 12 * 24)
+    ax.set_yticks(rng)
+    ax.set_yticklabels(labels[rng])
+
+    plt.show()
+
+
