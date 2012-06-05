@@ -210,22 +210,22 @@ def heatmap(filename,
     takes a file output by export_sd_to_csv and writes it as a 2-d heat
     map
     '''
+    import dateutil
+
     temp_df = p.read_csv(filename)
+    temp_df['meter_time_stamp'] = [dateutil.parser.parse(i) for i in
+                                   temp_df['meter_time_stamp']]
 
     df = temp_df.pivot(index='meter_time_stamp',
                        columns='physical_circuit',
                        values=column)
 
-    '''
-    # TODO expand date index to include all dates in range
-    date_range = p.DateRange(date_start, date_end,
-                             offset=p.DateOffset(seconds=interval_seconds))
-    # apply this index to pivoted data frame
-    # dataframe.reindex exists
-    df = df.reindex(date_range)
-    '''
-
-    #pdf.pop(0)
+    if date_start is not None:
+        #create date range
+        date_range = p.DateRange(date_start, date_end,
+                                 offset=p.DateOffset(seconds=interval_seconds))
+        # apply this index to pivoted data frame
+        df = df.reindex(date_range)
 
     if truncate is not None:
         df[df > truncate] = truncate
