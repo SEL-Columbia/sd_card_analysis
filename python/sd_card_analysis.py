@@ -12,6 +12,10 @@ def export_sd_to_csv(data_directory,
                      output_file='default.csv'):
     '''
     load_database_from_csv
+    traverse directory of files and assemble into single data frame
+
+    calls:
+    read_and_sample_log_file
 
     input:
     data_directory   : top level of data_directory to be imported
