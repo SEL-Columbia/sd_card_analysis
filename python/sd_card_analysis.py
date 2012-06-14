@@ -212,12 +212,21 @@ def heatmap(filename,
     '''
     import dateutil
 
-    temp_df = p.read_csv(filename)
-    temp_df['meter_time_stamp'] = [dateutil.parser.parse(i) for i in
+    # input file based on extension
+    if '.h5' in filename:
+        store = p.HDFStore(filename)
+        temp_df = store['df']
+    elif '.csv' in filename:
+        temp_df = p.read_csv(filename)
+        temp_df['meter_time_stamp'] = [dateutil.parser.parse(i) for i in
                                    temp_df['meter_time_stamp']]
+    else:
+        # TODO return file not found message
+        return None
 
     df = temp_df.pivot(index='meter_time_stamp',
-                       columns='physical_circuit',
+                       #columns='physical_circuit',
+                       columns='meter_circuit_name',
                        values=column)
 
     if date_start is not None:
@@ -248,6 +257,9 @@ def heatmap(filename,
     rng = range(0, len(labels), 12 * 24)
     ax.set_yticks(rng)
     ax.set_yticklabels(labels[rng])
+
+    ax.set_xticks(range(len(df.columns)))
+    ax.set_xticklabels(df.columns)
 
     plt.show()
 
