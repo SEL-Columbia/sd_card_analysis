@@ -89,6 +89,21 @@ def export_sd_to_csv(data_directory,
     # return data frame
     return df
 
+def fail_mail():
+    import smtplib
+    fromaddr = 'drsautomate@gmail.com'
+    toaddr = 'drdrsoto@gmail.com'
+    msg = 'script_failure'
+    username = 'drsautomate'
+    password = username[::-1]
+
+    server = smtplib.SMTP('smtp.gmail.com:587')
+    server.starttls()
+    server.login(username, password)
+    server.sendmail(fromaddr, toaddr, msg)
+    server.quit()
+
+
 def read_and_sample_log_file(filename,
                              date_start,
                              date_end,
@@ -124,7 +139,10 @@ def read_and_sample_log_file(filename,
     # TODO : what if line has poorly formed line?
 
     # load file
-    df = p.read_csv(filename)
+    try:
+        df = p.read_csv(filename)
+    except:
+        fail_mail()
 
     # map datetime object onto timestamp column
     df['Time Stamp'] = df['Time Stamp'].map(str)
@@ -200,15 +218,17 @@ def get_watthours_today(meter_name, ip_address, date_start, date_end):
     sd = p.Series(sd['watthours_today'], index=sd['meter_timestamp'])
     return sd
 
-def heatmap(filename,
+def all_heatmap(filename,
             truncate=None,
             column='watts',
             date_start=None,
             date_end=None,
-            interval_seconds=None):
+            interval_seconds=None,
+            plot_filename=None):
     '''
     takes a file output by export_sd_to_csv and writes it as a 2-d heat
     map
+    this heatmap is for all consumers
     '''
     import dateutil
 
@@ -216,6 +236,7 @@ def heatmap(filename,
     if '.h5' in filename:
         store = p.HDFStore(filename)
         temp_df = store['df']
+        store.close()
     elif '.csv' in filename:
         temp_df = p.read_csv(filename)
         temp_df['meter_time_stamp'] = [dateutil.parser.parse(i) for i in
@@ -261,6 +282,47 @@ def heatmap(filename,
     ax.set_xticks(range(len(df.columns)))
     ax.set_xticklabels(df.columns)
 
-    plt.show()
+    if plot_filename is None:
+        plt.show()
+    else:
+        fig.savefig(plot_filename)
 
+def daily_heatmap():
+    '''
+    plots out the daily heatmap for consumer data where columns are date
+    and rows are hours
+    what data source do we use?
+    we can take the big uganda hdf file and then pivot to get watts
+    we then select a column and then maybe group by/ pivot by time and output to
+    data frame?
+    '''
+
+    import pandas as p
+    import numpy as np
+    # read in HDF5 file to data frame
+    store = p.HDFStore('ugall.h5')
+    df = store['df']
+    store.close()
+
+    watts = df.pivot(index='meter_time_stamp',
+                          columns='meter_circuit_name',
+                          values='watts')
+    for c in watts.columns:
+    #for c in ['ug08_00']:
+        s = watts[c]
+        s = s.resample('H')
+        sgb = s.groupby(s.index.hour)
+        dfl = {}
+        for name, group in sgb:
+            temp = group.resample('H', fill_method='pad')
+            temp = temp.resample('D')
+            dfl[name]=temp
+        df = p.DataFrame(dfl)
+        # pad missing data
+        df = df.fillna(0)
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots(1, 1)
+        plot = ax.imshow(df, aspect='auto', interpolation='none')
+        fig.colorbar(plot)
+        plt.show()
 
